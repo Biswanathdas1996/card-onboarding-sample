@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import FormValidator from '../services/FormValidator';
+import CustomerDataSubmission from '../api/CustomerDataSubmission_DB';
 
 function CustomerForm() {
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ function CustomerForm() {
 
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const filledFields = useMemo(() => {
     return Object.values(formData).filter(val => val.trim() !== '').length;
@@ -33,68 +36,60 @@ function CustomerForm() {
       [name]: value
     }));
     setError('');
+    
+    // Clear field-specific error when user starts typing
+    if (fieldErrors[name]) {
+      const validationError = FormValidator.validateField(name, value);
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: validationError
+      }));
+    }
   };
 
   const validateForm = () => {
-    if (!formData.firstName.trim()) {
-      setError('First name is required');
+    const errors = FormValidator.validateAll(formData, 'customer');
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      const firstError = Object.values(errors)[0];
+      setError(firstError);
       return false;
     }
-    if (!formData.lastName.trim()) {
-      setError('Last name is required');
-      return false;
-    }
-    if (!formData.email.trim()) {
-      setError('Email is required');
-      return false;
-    }
-    if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      setError('Please enter a valid email');
-      return false;
-    }
-    if (!formData.phone.trim()) {
-      setError('Phone number is required');
-      return false;
-    }
-    if (!formData.dateOfBirth) {
-      setError('Date of birth is required');
-      return false;
-    }
-    if (!formData.address.trim()) {
-      setError('Address is required');
-      return false;
-    }
-    if (!formData.city.trim()) {
-      setError('City is required');
-      return false;
-    }
-    if (!formData.state) {
-      setError('State is required');
-      return false;
-    }
-    if (!formData.zipCode.trim()) {
-      setError('Zip code is required');
-      return false;
-    }
-    if (!formData.income) {
-      setError('Annual income is required');
-      return false;
-    }
+    setFieldErrors({});
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (validateForm()) {
-      console.log('Form submitted:', formData);
-      setSubmitted(true);
-      
-      setTimeout(() => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setSubmitted(true);
+    setError('');
+
+    try {
+      // Submit customer form data
+      const response = await CustomerDataSubmission.submitCustomerForm(formData);
+
+      if (response.success) {
+        console.log('Customer form submitted successfully:', response);
+        // Navigate to KYC page after successful submission with customer ID
+        setTimeout(() => {
+          navigate('/kyc', { state: { customerId: response.data.customerId } });
+        }, 1500);
+      } else {
         setSubmitted(false);
-        alert('Application submitted successfully!');
-        navigate('/');
-      }, 2000);
+        setError(response.message || 'Failed to submit application. Please try again.');
+        if (response.errors) {
+          setFieldErrors(response.errors);
+        }
+      }
+    } catch (err) {
+      console.error('Error submitting customer form:', err);
+      setSubmitted(false);
+      setError('An error occurred while submitting your application. Please try again.');
     }
   };
 
@@ -123,7 +118,7 @@ function CustomerForm() {
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
               <polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
-            Application submitted successfully!
+            Application submitted successfully! Redirecting to KYC verification...
           </div>
         )}
 
@@ -151,7 +146,9 @@ function CustomerForm() {
                 value={formData.firstName}
                 onChange={handleChange}
                 placeholder="John"
+                className={fieldErrors.firstName ? 'input-error' : ''}
               />
+              {fieldErrors.firstName && <small className="field-error">{fieldErrors.firstName}</small>}
             </div>
 
             <div className="form-group">
@@ -163,7 +160,9 @@ function CustomerForm() {
                 value={formData.lastName}
                 onChange={handleChange}
                 placeholder="Doe"
+                className={fieldErrors.lastName ? 'input-error' : ''}
               />
+              {fieldErrors.lastName && <small className="field-error">{fieldErrors.lastName}</small>}
             </div>
           </div>
 
@@ -176,7 +175,9 @@ function CustomerForm() {
               value={formData.email}
               onChange={handleChange}
               placeholder="john.doe@example.com"
+              className={fieldErrors.email ? 'input-error' : ''}
             />
+            {fieldErrors.email && <small className="field-error">{fieldErrors.email}</small>}
           </div>
 
           <div className="form-row">
@@ -189,7 +190,9 @@ function CustomerForm() {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="(555) 123-4567"
+                className={fieldErrors.phone ? 'input-error' : ''}
               />
+              {fieldErrors.phone && <small className="field-error">{fieldErrors.phone}</small>}
             </div>
 
             <div className="form-group">
@@ -200,7 +203,9 @@ function CustomerForm() {
                 name="dateOfBirth"
                 value={formData.dateOfBirth}
                 onChange={handleChange}
+                className={fieldErrors.dateOfBirth ? 'input-error' : ''}
               />
+              {fieldErrors.dateOfBirth && <small className="field-error">{fieldErrors.dateOfBirth}</small>}
             </div>
           </div>
 
@@ -215,7 +220,9 @@ function CustomerForm() {
               value={formData.address}
               onChange={handleChange}
               placeholder="123 Main Street"
+              className={fieldErrors.address ? 'input-error' : ''}
             />
+            {fieldErrors.address && <small className="field-error">{fieldErrors.address}</small>}
           </div>
 
           <div className="form-row">
@@ -228,7 +235,9 @@ function CustomerForm() {
                 value={formData.city}
                 onChange={handleChange}
                 placeholder="New York"
+                className={fieldErrors.city ? 'input-error' : ''}
               />
+              {fieldErrors.city && <small className="field-error">{fieldErrors.city}</small>}
             </div>
 
             <div className="form-group">
@@ -238,6 +247,7 @@ function CustomerForm() {
                 name="state"
                 value={formData.state}
                 onChange={handleChange}
+                className={fieldErrors.state ? 'input-error' : ''}
               >
                 <option value="">Select State</option>
                 <option value="CA">California</option>
@@ -251,6 +261,7 @@ function CustomerForm() {
                 <option value="NC">North Carolina</option>
                 <option value="MI">Michigan</option>
               </select>
+              {fieldErrors.state && <small className="field-error">{fieldErrors.state}</small>}
             </div>
           </div>
 
@@ -263,7 +274,9 @@ function CustomerForm() {
               value={formData.zipCode}
               onChange={handleChange}
               placeholder="10001"
+              className={fieldErrors.zipCode ? 'input-error' : ''}
             />
+            {fieldErrors.zipCode && <small className="field-error">{fieldErrors.zipCode}</small>}
           </div>
 
           <div className="section-title">Financial Information</div>
@@ -275,6 +288,7 @@ function CustomerForm() {
               name="income"
               value={formData.income}
               onChange={handleChange}
+              className={fieldErrors.income ? 'input-error' : ''}
             >
               <option value="">Select Income Range</option>
               <option value="25-50k">$25,000 - $50,000</option>
@@ -283,6 +297,7 @@ function CustomerForm() {
               <option value="100-150k">$100,000 - $150,000</option>
               <option value="150k+">$150,000+</option>
             </select>
+            {fieldErrors.income && <small className="field-error">{fieldErrors.income}</small>}
           </div>
 
           <button
@@ -299,3 +314,5 @@ function CustomerForm() {
 }
 
 export default CustomerForm;
+
+

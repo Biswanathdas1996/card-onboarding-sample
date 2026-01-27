@@ -948,6 +948,27 @@ body {
   font-size: 0.95rem;
 }
 
+.form-group input.input-error,
+.form-group select.input-error {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.form-group input.input-error:focus,
+.form-group select.input-error:focus {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.05);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+.field-error {
+  display: block;
+  color: #f87171;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
 @media (max-width: 1024px) {
   .hero-container {
     grid-template-columns: 1fr;
