@@ -201,6 +201,16 @@ const KYCModel = {
   },
 
   /**
+   * Validate Aadhaar Number format (12 digits)
+   * @param {string} aadhaar - Aadhaar number to validate
+   * @returns {boolean} - True if valid
+   */
+  validateAadhaar: (aadhaar) => {
+    if (!aadhaar || typeof aadhaar !== 'string') return false;
+    return /^\d{12}$/.test(aadhaar.trim());
+  },
+
+  /**
    * Validate date format (YYYY-MM-DD)
    * @param {string} dateStr - Date string to validate
    * @returns {boolean} - True if valid

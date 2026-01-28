@@ -126,6 +126,37 @@ describe('FormValidator Service', () => {
     });
   });
 
+  // Aadhaar Number Tests
+  describe('Aadhaar Number Validation', () => {
+    test('should reject empty Aadhaar number', () => {
+      expect(FormValidator.validateField('aadhaarNumber', '')).toBe('Aadhaar Number is required');
+    });
+
+    test('should reject Aadhaar number with less than 12 digits', () => {
+      expect(FormValidator.validateField('aadhaarNumber', '12345678901')).toContain('exactly 12 digits');
+    });
+
+    test('should reject Aadhaar number with more than 12 digits', () => {
+      expect(FormValidator.validateField('aadhaarNumber', '1234567890123')).toContain('exactly 12 digits');
+    });
+
+    test('should reject Aadhaar number with non-numeric characters', () => {
+      expect(FormValidator.validateField('aadhaarNumber', '1234567890AB')).toContain('exactly 12 digits');
+      expect(FormValidator.validateField('aadhaarNumber', '123456-78901')).toContain('exactly 12 digits');
+      expect(FormValidator.validateField('aadhaarNumber', 'ABCDEFGHIJKL')).toContain('exactly 12 digits');
+    });
+
+    test('should accept valid 12-digit Aadhaar numbers', () => {
+      expect(FormValidator.validateField('aadhaarNumber', '123456789012')).toBeNull();
+      expect(FormValidator.validateField('aadhaarNumber', '000000000000')).toBeNull();
+      expect(FormValidator.validateField('aadhaarNumber', '999999999999')).toBeNull();
+    });
+
+    test('should handle whitespace in Aadhaar validation', () => {
+      expect(FormValidator.validateField('aadhaarNumber', ' 123456789012 ')).toBeNull();
+    });
+  });
+
   // Form Validation Tests
   describe('Complete Form Validation', () => {
     test('should validate complete customer form', () => {
@@ -149,7 +180,9 @@ describe('FormValidator Service', () => {
       const validKYCData = {
         govID: 'A12B34C56',
         kycAddress: '123 Main Street, Apartment 4B',
-        kycDob: '1990-01-01'
+        kycDob: '1990-01-01',
+        pan: 'ABCD1234EF',
+        aadhaarNumber: '123456789012'
       };
 
       expect(FormValidator.validateForm(validKYCData, 'kyc')).toBe(true);

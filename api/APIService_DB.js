@@ -28,7 +28,7 @@ const APIService = {
       await simulateNetworkDelay(350);
 
       // Validate required fields
-      const requiredFields = ['govID', 'kycAddress', 'kycDob', 'pan'];
+      const requiredFields = ['govID', 'kycAddress', 'kycDob', 'pan', 'aadhaarNumber'];
       const missingFields = requiredFields.filter((field) => !kycData[field]);
 
       if (missingFields.length > 0) {
@@ -71,6 +71,16 @@ const APIService = {
         };
       }
 
+      // Validate Aadhaar Number format
+      if (!KYCModel.validateAadhaar(kycData.aadhaarNumber)) {
+        return {
+          success: false,
+          status: 400,
+          message: 'Invalid Aadhaar Number. Must be exactly 12 digits.',
+          timestamp: new Date().toISOString()
+        };
+      }
+
       // Validate date
       if (!KYCModel.validateDate(kycData.kycDob)) {
         return {
@@ -85,6 +95,7 @@ const APIService = {
       const result = await KYCModelDB.create(customerId, {
         pan: kycData.pan,
         govID: kycData.govID,
+        aadhaarNumber: kycData.aadhaarNumber,
         govIDType: kycData.govIDType || null,
         dateOfBirth: kycData.kycDob,
         nationality: kycData.nationality || null,
@@ -165,6 +176,7 @@ const APIService = {
           customerId: record.customer_id,
           govID: record.govID,
           govIDType: record.gov_id_type,
+          aadhaarNumber: record.aadhaarNumber,
           dateOfBirth: record.date_of_birth,
           nationality: record.nationality,
           kycAddress: record.kyc_address,

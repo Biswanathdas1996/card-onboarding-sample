@@ -152,6 +152,16 @@ const FormValidator = {
       return null;
     }
 
+    // Aadhaar Number Field - 12-digit number
+    if (fieldName === 'aadhaarNumber') {
+      if (!trimmedValue) return 'Aadhaar Number is required';
+      const aadhaarRegex = /^\d{12}$/;
+      if (!aadhaarRegex.test(trimmedValue)) {
+        return 'Aadhaar Number must be exactly 12 digits';
+      }
+      return null;
+    }
+
     return null;
   },
 
@@ -183,7 +193,7 @@ const FormValidator = {
         if (error) return false;
       }
     } else if (formType === 'kyc') {
-      const requiredFields = ['govID', 'kycAddress', 'kycDob', 'pan'];
+      const requiredFields = ['govID', 'kycAddress', 'kycDob', 'pan', 'aadhaarNumber'];
 
       for (const field of requiredFields) {
         const error = FormValidator.validateField(field, formData[field]);
@@ -220,7 +230,7 @@ const FormValidator = {
         'income'
       ];
     } else if (formType === 'kyc') {
-      fields = ['govID', 'kycAddress', 'kycDob', 'pan'];
+      fields = ['govID', 'kycAddress', 'kycDob', 'pan', 'aadhaarNumber'];
     }
 
     for (const field of fields) {

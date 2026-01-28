@@ -44,6 +44,7 @@ CREATE TABLE kyc_submissions (
   pan VARCHAR(255) NOT NULL UNIQUE, -- Encrypted
   gov_id VARCHAR(500) NOT NULL,   -- Encrypted (Passport, Aadhaar, etc.)
   gov_id_type VARCHAR(50),        -- Type of government ID
+  aadhaar_number VARCHAR(255),    -- Encrypted 12-digit Aadhaar Number
   date_of_birth DATE NOT NULL,
   nationality VARCHAR(100),
   

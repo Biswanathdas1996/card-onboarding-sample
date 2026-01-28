@@ -25,6 +25,7 @@ function KYCPage() {
     kycAddress: '',
     kycDob: '',
     pan: '',
+    aadhaarNumber: '',
     govIDType: 'passport',
     nationality: '',
     city: '',
@@ -243,6 +244,31 @@ function KYCPage() {
             />
             {errors.pan && <span className="error-message">{errors.pan}</span>}
             <span className="character-count">{formData.pan.length}/10</span>
+          </div>
+
+          {/* Aadhaar Number Field */}
+          <div className="form-group">
+            <label htmlFor="aadhaarNumber" className="form-label">
+              Aadhaar Number <span className="required-asterisk">*</span>
+            </label>
+            <p className="field-hint">
+              Enter your 12-digit Aadhaar Number (numeric only)
+            </p>
+            <input
+              id="aadhaarNumber"
+              type="text"
+              name="aadhaarNumber"
+              value={formData.aadhaarNumber}
+              onChange={handleChange}
+              placeholder="e.g., 123456789012"
+              className={`form-input ${errors.aadhaarNumber ? 'input-error' : ''}`}
+              disabled={submitting || submitted}
+              maxLength={12}
+              pattern="\d{12}"
+              inputMode="numeric"
+            />
+            {errors.aadhaarNumber && <span className="error-message">{errors.aadhaarNumber}</span>}
+            <span className="character-count">{formData.aadhaarNumber.length}/12</span>
           </div>
 
           {/* Submit Button */}

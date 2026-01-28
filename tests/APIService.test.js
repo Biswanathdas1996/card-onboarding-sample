@@ -65,6 +65,16 @@ describe('Backend KYC Model Tests', () => {
       expect(KYCModel.validateGovID('A'.repeat(21))).toBe(false); // Too long
     });
 
+    test('should validate Aadhaar Number format (12 digits)', () => {
+      expect(KYCModel.validateAadhaar('123456789012')).toBe(true);
+      expect(KYCModel.validateAadhaar('000000000000')).toBe(true);
+      expect(KYCModel.validateAadhaar('999999999999')).toBe(true);
+      expect(KYCModel.validateAadhaar('12345678901')).toBe(false); // Too short
+      expect(KYCModel.validateAadhaar('1234567890123')).toBe(false); // Too long
+      expect(KYCModel.validateAadhaar('1234567890AB')).toBe(false); // Non-numeric
+      expect(KYCModel.validateAadhaar('')).toBe(false); // Empty
+    });
+
     test('should validate date format', () => {
       expect(KYCModel.validateDate('1990-01-15')).toBe(true);
       expect(KYCModel.validateDate('01/15/1990')).toBe(true); // Various formats accepted by Date
@@ -233,12 +243,113 @@ describe('Backend API Service Tests', () => {
       expect(response2.message).toMatch(/already exists/i);
     });
 
-    test('should retrieve KYC data by ID (GET /kyc-data/:kycId)', async () => {
+    test('should submit KYC data with Aadhaar Number', async () => {
+      const kycData = {
+        govID: 'VALID12345',
+        kycAddress: '123 Main Street',
+        kycDob: '1990-01-15',
+        pan: 'ABCD1234EF',
+        aadhaarNumber: '123456789012'
+      };
+
+      const response = await APIService.submitKYCData(kycData, 'CUST-12345');
+
+      expect(response.success).toBe(true);
+      expect(response.status).toBe(201);
+      expect(response.data.kycId).toBeTruthy();
+    });
+
+    test('should reject submission with missing Aadhaar Number', async () => {
       const kycData = {
         govID: 'VALID12345',
         kycAddress: '123 Main Street',
         kycDob: '1990-01-15',
         pan: 'ABCD1234EF'
+        // Missing Aadhaar Number
+      };
+
+      const response = await APIService.submitKYCData(kycData);
+
+      expect(response.success).toBe(false);
+      expect(response.status).toBe(400);
+      expect(response.message).toMatch(/missing required fields|aadhaar/i);
+    });
+
+    test('should reject submission with invalid Aadhaar format', async () => {
+      const invalidAadhaarCases = [
+        '12345678901',    // 11 digits
+        '1234567890123',  // 13 digits
+        'abcd12345678',   // Letters
+        '123456-78901',   // Special chars
+        ''                // Empty
+      ];
+
+      for (const aadhaar of invalidAadhaarCases) {
+        const kycData = {
+          govID: 'VALID12345',
+          kycAddress: '123 Main Street',
+          kycDob: '1990-01-15',
+          pan: 'ABCD1234EF',
+          aadhaarNumber: aadhaar
+        };
+
+        const response = await APIService.submitKYCData(kycData);
+
+        expect(response.success).toBe(false);
+        expect(response.status).toBe(400);
+        expect(response.message).toMatch(/invalid.*aadhaar|aadhaar.*invalid/i);
+      }
+    });
+
+    test('should retrieve KYC data with decrypted Aadhaar Number', async () => {
+      const kycData = {
+        govID: 'VALID12345',
+        kycAddress: '123 Main Street',
+        kycDob: '1990-01-15',
+        pan: 'ABCD1234EF',
+        aadhaarNumber: '987654321098'
+      };
+
+      const submitResponse = await APIService.submitKYCData(kycData, 'CUST-12345');
+      const kycId = submitResponse.data.kycId;
+
+      const getResponse = await APIService.getKYCData(kycId);
+
+      expect(getResponse.success).toBe(true);
+      expect(getResponse.data.aadhaarNumber).toBe(kycData.aadhaarNumber);
+      expect(getResponse.data.pan).toBe(kycData.pan);
+    });
+
+    test('should handle multiple Aadhaar validations for different customers', async () => {
+      const customers = [
+        { id: 'CUST-001', aadhaar: '111111111111' },
+        { id: 'CUST-002', aadhaar: '222222222222' },
+        { id: 'CUST-003', aadhaar: '333333333333' }
+      ];
+
+      for (const customer of customers) {
+        const kycData = {
+          govID: `ID-${customer.id}`,
+          kycAddress: '123 Main Street',
+          kycDob: '1990-01-15',
+          pan: `PAN${customer.id}`,
+          aadhaarNumber: customer.aadhaar
+        };
+
+        const response = await APIService.submitKYCData(kycData, customer.id);
+
+        expect(response.success).toBe(true);
+        expect(response.data.kycId).toBeTruthy();
+      }
+    });
+
+    test('should retrieve KYC data by ID (GET /kyc-data/:kycId)', async () => {
+      const kycData = {
+        govID: 'VALID12345',
+        kycAddress: '123 Main Street',
+        kycDob: '1990-01-15',
+        pan: 'ABCD1234EF',
+        aadhaarNumber: '123456789012'
       };
 
       const submitResponse = await APIService.submitKYCData(kycData, 'CUST-12345');
@@ -249,6 +360,7 @@ describe('Backend API Service Tests', () => {
       expect(getResponse.success).toBe(true);
       expect(getResponse.data.pan).toBe(kycData.pan);
       expect(getResponse.data.govID).toBe(kycData.govID);
+      expect(getResponse.data.aadhaarNumber).toBe(kycData.aadhaarNumber);
     });
 
     test('should return 404 for non-existent KYC record', async () => {

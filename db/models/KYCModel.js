@@ -80,6 +80,7 @@ const KYCModel = {
       let {
         pan,
         govID,
+        aadhaarNumber,
         govIDType,
         dateOfBirth,
         nationality,
@@ -107,17 +108,18 @@ const KYCModel = {
       // Encrypt sensitive fields
       const encryptedPAN = encryptData(pan);
       const encryptedGovID = encryptData(govID);
+      const encryptedAadhaar = aadhaarNumber ? encryptData(aadhaarNumber) : null;
 
       // Generate PAN hash for duplicate detection
       const panHash = generatePANHash(pan);
 
       const query = `
         INSERT INTO kyc_submissions (
-          customer_id, pan, gov_id, gov_id_type, date_of_birth, nationality,
+          customer_id, pan, gov_id, gov_id_type, aadhaar_number, date_of_birth, nationality,
           kyc_address, city, state, postal_code, country, occupation,
           politically_exposed_person, ip_address, user_agent, submission_source
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
         RETURNING id, created_at;
       `;
 
@@ -126,6 +128,7 @@ const KYCModel = {
         encryptedPAN,
         encryptedGovID,
         govIDType || null,
+        encryptedAadhaar,
         dateOfBirth || null,
         nationality || null,
         kycAddress,
@@ -174,7 +177,7 @@ const KYCModel = {
   getById: async (kycId) => {
     try {
       const query = `
-        SELECT id, customer_id, pan, gov_id, gov_id_type, date_of_birth, nationality,
+        SELECT id, customer_id, pan, gov_id, aadhaar_number, gov_id_type, date_of_birth, nationality,
                kyc_address, city, state, postal_code, country, occupation,
                politically_exposed_person, document_url, verification_status,
                verification_notes, verified_by, verified_at, created_at, updated_at
@@ -187,7 +190,9 @@ const KYCModel = {
         // Decrypt sensitive fields
         result.pan = decryptData(result.pan);
         result.govID = decryptData(result.gov_id);
+        result.aadhaarNumber = result.aadhaar_number ? decryptData(result.aadhaar_number) : null;
         delete result.gov_id; // Remove encrypted field
+        delete result.aadhaar_number; // Remove encrypted field
       }
       return result;
     } catch (error) {
@@ -204,7 +209,7 @@ const KYCModel = {
   getByCustomerId: async (customerId) => {
     try {
       const query = `
-        SELECT id, customer_id, pan, gov_id, gov_id_type, date_of_birth, nationality,
+        SELECT id, customer_id, pan, gov_id, aadhaar_number, gov_id_type, date_of_birth, nationality,
                kyc_address, city, state, postal_code, country, occupation,
                politically_exposed_person, document_url, verification_status,
                verification_notes, verified_by, verified_at, created_at, updated_at
@@ -218,7 +223,9 @@ const KYCModel = {
       if (result) {
         result.pan = decryptData(result.pan);
         result.govID = decryptData(result.gov_id);
+        result.aadhaarNumber = result.aadhaar_number ? decryptData(result.aadhaar_number) : null;
         delete result.gov_id;
+        delete result.aadhaar_number;
       }
       return result;
     } catch (error) {
