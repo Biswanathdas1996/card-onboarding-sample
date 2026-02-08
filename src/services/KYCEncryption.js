@@ -34,11 +34,11 @@ const getEncryptionKey = (key) => {
  * const { aadhaar_encrypted, iv } = encryptAadhaar('123456789012');
  */
 const encryptAadhaar = (aadhaar) => {
-  try {
-    if (!aadhaar || typeof aadhaar !== 'string') {
-      throw new Error('Invalid Aadhaar number provided');
-    }
+  if (!aadhaar || typeof aadhaar !== 'string') {
+    throw new Error('Invalid Aadhaar number provided');
+  }
 
+  try {
     const key = getEncryptionKey(AES_KEY);
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv(ENCRYPTION_ALGORITHM, key, iv);
@@ -65,11 +65,11 @@ const encryptAadhaar = (aadhaar) => {
  * const decrypted = decryptAadhaar(encryptedData, ivString);
  */
 const decryptAadhaar = (aadhaarEncrypted, ivBase64) => {
-  try {
-    if (!aadhaarEncrypted || !ivBase64) {
-      throw new Error('Invalid encrypted data or IV provided');
-    }
+  if (!aadhaarEncrypted || !ivBase64) {
+    throw new Error('Invalid encrypted data or IV provided');
+  }
 
+  try {
     const key = getEncryptionKey(AES_KEY);
     const iv = Buffer.from(ivBase64, 'base64');
     const decipher = crypto.createDecipheriv(ENCRYPTION_ALGORITHM, key, iv);

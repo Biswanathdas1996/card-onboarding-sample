@@ -107,6 +107,7 @@ const KYCModel = {
       kycAddress: data.kycAddress, // Can be encrypted if needed
       kycDob: encryptData(data.kycDob),
       pan: encryptData(data.pan), // PAN is always encrypted
+      aadhaarNumber: data.aadhaarNumber ? encryptData(data.aadhaarNumber) : null,
       customerId: data.customerId || null,
       verificationStatus: 'pending', // pending, verified, rejected, expired
       createdAt: new Date().toISOString(),
@@ -138,6 +139,7 @@ const KYCModel = {
       kycAddress: record.kycAddress,
       kycDob: decryptData(record.kycDob),
       pan: decryptData(record.pan),
+      aadhaarNumber: record.aadhaarNumber ? decryptData(record.aadhaarNumber) : null,
       customerId: record.customerId,
       verificationStatus: record.verificationStatus,
       createdAt: record.createdAt,
@@ -167,6 +169,9 @@ const KYCModel = {
     }
     if (updateData.pan) {
       updated.pan = encryptData(updateData.pan);
+    }
+    if (updateData.aadhaarNumber) {
+      updated.aadhaarNumber = encryptData(updateData.aadhaarNumber);
     }
     if (updateData.kycAddress) {
       updated.kycAddress = updateData.kycAddress;
@@ -240,6 +245,7 @@ const KYCModel = {
     kycAddress: { type: 'String', required: true },
     kycDob: { type: 'Date', required: true, encrypted: true },
     pan: { type: 'String', required: true, encrypted: true, indexed: 'hash' },
+    aadhaarNumber: { type: 'String', required: false, encrypted: true },
     panHash: { type: 'String', unique: true, sparse: true }, // For duplicate detection
     customerId: { type: 'String', index: true },
     verificationStatus: {

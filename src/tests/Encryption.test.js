@@ -8,7 +8,7 @@ const {
   decryptAadhaar,
   generateAadhaarHash,
   isValidAadhaarFormat
-} = require('../src/services/KYCEncryption');
+} = require('../services/KYCEncryption');
 
 describe('KYC Encryption Service', () => {
   describe('Aadhaar Encryption and Decryption', () => {

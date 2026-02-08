@@ -34,7 +34,7 @@ const APIService = {
       await simulateNetworkDelay(350);
 
       // Validate required fields
-      const requiredFields = ['govID', 'kycAddress', 'kycDob', 'pan'];
+      const requiredFields = ['govID', 'kycAddress', 'kycDob', 'pan', 'aadhaarNumber'];
       const missingFields = requiredFields.filter((field) => !kycData[field]);
 
       if (missingFields.length > 0) {
@@ -73,6 +73,16 @@ const APIService = {
           success: false,
           status: 400,
           message: 'Invalid Government ID format.',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Validate Aadhaar Number format
+      if (!KYCModel.validateAadhaar(kycData.aadhaarNumber)) {
+        return {
+          success: false,
+          status: 400,
+          message: 'Invalid Aadhaar Number. Must be exactly 12 digits.',
           timestamp: new Date().toISOString()
         };
       }

@@ -162,7 +162,8 @@ const CustomerDataSubmission = {
           govID: allData.govID,
           kycAddress: allData.kycAddress,
           kycDob: allData.kycDob,
-          pan: allData.pan
+          pan: allData.pan,
+          aadhaarNumber: allData.aadhaarNumber
         },
         'kyc'
       );

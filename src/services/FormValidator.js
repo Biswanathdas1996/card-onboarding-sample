@@ -144,7 +144,12 @@ const FormValidator = {
 
     // PAN Field - Permanent Account Number
     if (fieldName === 'pan') {
-      if (!trimmedValue) return 'PAN is required';
+      if (value === null || value === undefined) {
+        return 'PAN is required';
+      }
+      if (!trimmedValue) {
+        return 'PAN is required';
+      }
       const panRegex = /^[A-Za-z0-9]{10}$/;
       if (!panRegex.test(trimmedValue)) {
         return 'PAN must be 10 alphanumeric characters';
