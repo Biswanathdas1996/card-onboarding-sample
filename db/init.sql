@@ -4,6 +4,9 @@
 -- Drop existing tables if they exist (for fresh setup)
 DROP TABLE IF EXISTS kyc_submissions CASCADE;
 DROP TABLE IF EXISTS customer_forms CASCADE;
+DROP TABLE IF EXISTS employees CASCADE;
+DROP TABLE IF EXISTS timesheets CASCADE;
+DROP TABLE IF EXISTS payroll CASCADE;
 
 -- ============================================
 -- Customer Forms Table
@@ -118,6 +121,88 @@ CREATE INDEX idx_audit_action ON audit_logs(action);
 CREATE INDEX idx_audit_created_at ON audit_logs(created_at);
 
 -- ============================================
+-- Employee Table
+-- Stores employee information
+-- ============================================
+CREATE TABLE employees (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  first_name VARCHAR(100) NOT NULL,
+  last_name VARCHAR(100) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  phone_number VARCHAR(20),
+  date_of_birth DATE,
+  hire_date DATE,
+  job_title VARCHAR(100),
+  department VARCHAR(100),
+  salary DECIMAL(15, 2),
+  bank_account_number VARCHAR(50),
+  tax_identification_number VARCHAR(50),
+  address TEXT,
+  
+  -- Audit fields
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  status VARCHAR(50) DEFAULT 'active' -- active, inactive, terminated
+);
+
+CREATE INDEX idx_employee_email ON employees(email);
+CREATE INDEX idx_employee_status ON employees(status);
+
+-- ============================================
+-- Timesheet Table
+-- Stores employee timesheet data
+-- ============================================
+CREATE TABLE timesheets (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  employee_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  pay_period_start DATE NOT NULL,
+  pay_period_end DATE NOT NULL,
+  hours_worked DECIMAL(5, 2) NOT NULL,
+  project_code VARCHAR(50),
+  notes TEXT,
+  submission_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  approved BOOLEAN DEFAULT FALSE,
+  approved_by VARCHAR(100),
+
+  -- Audit fields
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_timesheet_employee_id ON timesheets(employee_id);
+CREATE INDEX idx_timesheet_pay_period ON timesheets(pay_period_start, pay_period_end);
+
+-- ============================================
+-- Payroll Table
+-- Stores payroll information
+-- ============================================
+CREATE TABLE payroll (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  employee_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  pay_period_start DATE NOT NULL,
+  pay_period_end DATE NOT NULL,
+  gross_pay DECIMAL(15, 2) NOT NULL,
+  total_deductions DECIMAL(15, 2) NOT NULL,
+  net_pay DECIMAL(15, 2) NOT NULL,
+  payment_date DATE,
+  payment_method VARCHAR(50),
+  check_number VARCHAR(50),
+  
+  -- Tax deductions
+  federal_tax DECIMAL(15, 2) DEFAULT 0.00,
+  state_tax DECIMAL(15, 2) DEFAULT 0.00,
+  social_security_tax DECIMAL(15, 2) DEFAULT 0.00,
+  medicare_tax DECIMAL(15, 2) DEFAULT 0.00,
+
+  -- Audit fields
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_payroll_employee_id ON payroll(employee_id);
+CREATE INDEX idx_payroll_pay_period ON payroll(pay_period_start, pay_period_end);
+
+-- ============================================
 -- Function: Update updated_at timestamp
 -- ============================================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -139,6 +224,21 @@ CREATE TRIGGER update_kyc_submissions_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_employees_updated_at
+  BEFORE UPDATE ON employees
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_timesheets_updated_at
+  BEFORE UPDATE ON timesheets
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_payroll_updated_at
+  BEFORE UPDATE ON payroll
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
 -- ============================================
 -- Grant appropriate permissions
 -- ============================================
@@ -147,6 +247,9 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON customer_forms TO neondb_owner;
 GRANT SELECT, INSERT, UPDATE, DELETE ON kyc_submissions TO neondb_owner;
 GRANT SELECT, INSERT, UPDATE, DELETE ON pan_hashes TO neondb_owner;
 GRANT SELECT, INSERT ON audit_logs TO neondb_owner;
+GRANT SELECT, INSERT, UPDATE, DELETE ON employees TO neondb_owner;
+GRANT SELECT, INSERT, UPDATE, DELETE ON timesheets TO neondb_owner;
+GRANT SELECT, INSERT, UPDATE, DELETE ON payroll TO neondb_owner;
 
 -- Allow seq access for UUID generation
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO neondb_owner;

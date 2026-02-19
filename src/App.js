@@ -6,6 +6,7 @@ import './App.css';
 
 // Lazy load KYC component for performance optimization
 const KYCPage = lazy(() => import('./pages/KYCPage'));
+const PayrollWorkflow = lazy(() => import('./pages/PayrollWorkflow'));
 
 // Loading component for lazy-loaded routes
 function LoadingSpinner() {
@@ -54,6 +55,14 @@ function App() {
             element={
               <Suspense fallback={<LoadingSpinner />}>
                 <KYCPage />
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/payroll" 
+            element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <PayrollWorkflow />
               </Suspense>
             } 
           />

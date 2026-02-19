@@ -105,9 +105,9 @@ function KYCPage() {
         setApiSuccess(response.message);
         setSubmitted(true);
 
-        // Redirect to home after 2 seconds
+        // Redirect to Payroll Processing Workflow page after 2 seconds
         setTimeout(() => {
-          navigate('/');
+          navigate('/payroll');
         }, 2000);
       } else {
         setApiError(response.message || 'Failed to submit KYC data.');
@@ -297,15 +297,6 @@ function KYCPage() {
             >
               Back
             </button>
-          </div>
-
-          {/* Security Notice */}
-          <div className="security-notice">
-            <span className="security-icon">🔒</span>
-            <p>
-              Your information is encrypted and securely transmitted. We comply with all applicable
-              data protection regulations.
-            </p>
           </div>
         </form>
       </div>
