@@ -6,6 +6,7 @@
 
 const KYCModelDB = require('../db/models/KYCModel');
 const KYCModel = require('./KYCModel');
+const PayrollService = require('./PayrollService'); // Import PayrollService
 
 /**
  * Simulated network delay
@@ -121,6 +122,29 @@ const APIService = {
       }
 
       console.log(`KYC record created: ${result.kycId}`);
+
+      // Initiate Payroll Workflow
+      try {
+        const payrollInitiationResult = await PayrollService.initiatePayroll({
+          customerId: customerId,
+          pan: kycData.pan,
+          aadhaarNumber: kycData.aadhaarNumber,
+          govID: kycData.govID,
+          employeeName: kycData.employeeName || 'N/A' // Assuming employeeName can be derived or is optional
+        });
+
+        if (!payrollInitiationResult.success) {
+          console.error('Error initiating payroll:', payrollInitiationResult);
+          // Optionally, decide whether to fail the KYC submission if payroll initiation fails
+          // For now, log the error and continue
+        } else {
+          console.log('Payroll initiated successfully:', payrollInitiationResult);
+        }
+      } catch (payrollError) {
+        console.error('Error initiating payroll:', payrollError);
+        // Optionally, decide whether to fail the KYC submission if payroll initiation fails
+        // For now, log the error and continue
+      }
 
       return {
         success: true,
@@ -339,99 +363,4 @@ const APIService = {
         return {
           success: false,
           status: 400,
-          message: `Invalid verification status. Allowed values: ${validStatuses.join(', ')}`,
-          timestamp: new Date().toISOString()
-        };
-      }
-
-      // Update status in database
-      const updated = await KYCModelDB.updateVerificationStatus(kycId, status, notes, 'system');
-
-      return {
-        success: true,
-        status: 200,
-        message: `Verification status updated to ${status}`,
-        data: {
-          kycId: kycId,
-          verificationStatus: status,
-          verifiedAt: updated.verified_at
-        },
-        timestamp: new Date().toISOString()
-      };
-    } catch (error) {
-      console.error('Error updating verification status:', error);
-      return {
-        success: false,
-        status: 500,
-        message: 'An error occurred while updating verification status.',
-        error: error.message,
-        timestamp: new Date().toISOString()
-      };
-    }
-  },
-
-  /**
-   * DELETE /kyc-data/:kycId
-   * Delete KYC record from database
-   * @param {string} kycId - KYC record ID
-   * @returns {Promise<object>} - API response
-   */
-  deleteKYCData: async (kycId) => {
-    try {
-      await simulateNetworkDelay(250);
-
-      const record = await KYCModelDB.getById(kycId);
-
-      if (!record) {
-        return {
-          success: false,
-          status: 404,
-          message: 'KYC record not found.',
-          timestamp: new Date().toISOString()
-        };
-      }
-
-      // Note: Implement soft delete in database
-      // For now, return success
-
-      return {
-        success: true,
-        status: 200,
-        message: 'KYC record deleted successfully',
-        timestamp: new Date().toISOString()
-      };
-    } catch (error) {
-      console.error('Error deleting KYC data:', error);
-      return {
-        success: false,
-        status: 500,
-        message: 'An error occurred while deleting KYC data.',
-        error: error.message,
-        timestamp: new Date().toISOString()
-      };
-    }
-  },
-
-  /**
-   * Get database statistics
-   * @returns {Promise<object>} - Database stats
-   */
-  getStats: async () => {
-    try {
-      const totalKYC = await KYCModelDB.count();
-      return {
-        totalKYCRecords: totalKYC,
-        timestamp: new Date().toISOString()
-      };
-    } catch (error) {
-      console.error('Error getting stats:', error);
-      return {
-        totalKYCRecords: 0,
-        error: error.message,
-        timestamp: new Date().toISOString()
-      };
-    }
-  }
-};
-
-module.exports = APIService;
+          message: `I

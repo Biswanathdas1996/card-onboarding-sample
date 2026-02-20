@@ -11,6 +11,7 @@ require('dotenv').config();
 const CustomerModel = require('./db/models/CustomerModel');
 const KYCModel = require('./db/models/KYCModel');
 const APIService = require('./api/APIService_DB');
+const PayrollService = require('./api/PayrollService'); // Import PayrollService
 
 const app = express();
 const PORT = process.env.API_PORT || 5000;
@@ -264,7 +265,7 @@ app.get('/api/kyc/submission/:kycId', async (req, res) => {
 
 /**
  * PUT /api/kyc/:kycId/verify
- * Update KYC verification status
+ * Update KYC verification status and initiate payroll if approved
  */
 app.put('/api/kyc/:kycId/verify', async (req, res) => {
   try {
@@ -278,6 +279,38 @@ app.put('/api/kyc/:kycId/verify', async (req, res) => {
 
     if (!result.success) {
       return res.status(result.status).json(result);
+    }
+
+    // Initiate payroll workflow if KYC is approved
+    if (status === 'approved') {
+      const kycData = await APIService.getKYCData(req.params.kycId);
+
+      if (!kycData.success) {
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to retrieve KYC data for payroll initiation',
+          error: kycData.message
+        });
+      }
+
+      const payrollResult = await PayrollService.initiatePayroll(kycData.data.customerId, kycData.data);
+
+      if (!payrollResult.success) {
+        console.error('Error initiating payroll:', payrollResult.error);
+        return res.status(500).json({
+          success: false,
+          message: 'KYC verification updated, but payroll initiation failed',
+          kycResult: result,
+          payrollResult: payrollResult
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: 'KYC verification updated and payroll initiated',
+        kycResult: result,
+        payrollResult: payrollResult
+      });
     }
 
     res.json(result);
@@ -309,6 +342,112 @@ app.delete('/api/kyc/:kycId', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error deleting KYC data',
+      error: error.message
+    });
+  }
+});
+
+// ============================================
+// Timesheet Endpoints
+// ============================================
+
+/**
+ * POST /api/timesheets/:customerId
+ * Submit timesheet data for a customer
+ */
+app.post('/api/timesheets/:customerId', async (req, res) => {
+  try {
+    const customerId = req.params.customerId;
+    const timesheetData = req.body;
+
+    const result = await PayrollService.submitTimesheet(customerId, timesheetData);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: result.message,
+        error: result.error
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Timesheet submitted successfully',
+      timesheetId: result.timesheetId
+    });
+  } catch (error) {
+    console.error('Error submitting timesheet:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error submitting timesheet',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/timesheets/:customerId
+ * Retrieve timesheet data for a customer
+ */
+app.get('/api/timesheets/:customerId', async (req, res) => {
+  try {
+    const customerId = req.params.customerId;
+
+    const result = await PayrollService.getTimesheetsByCustomer(customerId);
+
+    if (!result.success) {
+      return res.status(404).json({
+        success: false,
+        message: result.message,
+        error: result.error
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result.data
+    });
+  } catch (error) {
+    console.error('Error retrieving timesheets:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving timesheets',
+      error: error.message
+    });
+  }
+});
+
+// ============================================
+// Payroll Endpoints
+// ============================================
+
+/**
+ * GET /api/payroll/:customerId
+ * Retrieve payroll data for a customer
+ */
+app.get('/api/payroll/:customerId', async (req, res) => {
+  try {
+    const customerId = req.params.customerId;
+
+    const result = await PayrollService.getPayrollData(customerId);
+
+    if (!result.success) {
+      return res.status(404).json({
+        success: false,
+        message: result.message,
+        error: result.error
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result.data
+    });
+  } catch (error) {
+    console.error('Error retrieving payroll data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving payroll data',
       error: error.message
     });
   }
@@ -398,6 +537,11 @@ Environment:  ${process.env.NODE_ENV || 'development'}
   GET    /api/kyc/submission/:id - Get KYC by ID
   PUT    /api/kyc/:id/verify     - Update verification status
   DELETE /api/kyc/:id            - Delete KYC record
+
+  POST   /api/timesheets/:customerId - Submit timesheet data
+  GET    /api/timesheets/:customerId - Get timesheets by customer
+
+  GET    /api/payroll/:customerId  - Get payroll data by customer
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   `);
 });

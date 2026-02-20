@@ -6,6 +6,8 @@ import './App.css';
 
 // Lazy load KYC component for performance optimization
 const KYCPage = lazy(() => import('./pages/KYCPage'));
+const TimesheetForm = lazy(() => import('./pages/TimesheetForm'));
+const ViewTimesheets = lazy(() => import('./pages/ViewTimesheets'));
 
 // Loading component for lazy-loaded routes
 function LoadingSpinner() {
@@ -54,6 +56,22 @@ function App() {
             element={
               <Suspense fallback={<LoadingSpinner />}>
                 <KYCPage />
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/timesheet" 
+            element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <TimesheetForm />
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/view-timesheets" 
+            element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <ViewTimesheets />
               </Suspense>
             } 
           />
