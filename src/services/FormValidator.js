@@ -167,6 +167,58 @@ const FormValidator = {
       return null;
     }
 
+    // Login Fields
+    if (fieldName === 'loginEmail') {
+      if (!trimmedValue) return 'Email is required';
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(trimmedValue)) {
+        return 'Please enter a valid email address';
+      }
+      return null;
+    }
+
+    if (fieldName === 'loginPassword') {
+      if (!trimmedValue) return 'Password is required';
+      return null;
+    }
+
+    return null;
+  },
+
+  /**
+   * Validate email format
+   * Reusable by LoginPage and ForgotPasswordPage
+   * @param {string} value - The email value to validate
+   * @returns {string|null} - Error message if invalid, null if valid
+   */
+  validateEmail: (value) => {
+    if (value === undefined || value === null) return 'Email is required';
+
+    const trimmedValue = String(value).trim();
+
+    if (!trimmedValue) return 'Email is required';
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedValue)) {
+      return 'Please enter a valid email address';
+    }
+
+    return null;
+  },
+
+  /**
+   * Validate password is non-empty
+   * Reusable by LoginPage
+   * @param {string} value - The password value to validate
+   * @returns {string|null} - Error message if invalid, null if valid
+   */
+  validatePassword: (value) => {
+    if (value === undefined || value === null) return 'Password is required';
+
+    const trimmedValue = String(value).trim();
+
+    if (!trimmedValue) return 'Password is required';
+
     return null;
   },
 

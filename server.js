@@ -11,6 +11,7 @@ require('dotenv').config();
 const CustomerModel = require('./db/models/CustomerModel');
 const KYCModel = require('./db/models/KYCModel');
 const APIService = require('./api/APIService_DB');
+const authRoutes = require('./api/routes/authRoutes');
 
 const app = express();
 const PORT = process.env.API_PORT || 5000;
@@ -31,6 +32,11 @@ app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
+
+// ============================================
+// Auth Endpoints
+// ============================================
+app.use('/api/auth', authRoutes);
 
 // ============================================
 // Customer Form Endpoints
@@ -388,6 +394,10 @@ Environment:  ${process.env.NODE_ENV || 'development'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   API Endpoints:
+  POST   /api/auth/login          - Login with email and password
+  POST   /api/auth/mfa/verify     - Verify MFA challenge
+  POST   /api/auth/forgot-password - Initiate password reset
+
   POST   /api/customers           - Submit customer form
   GET    /api/customers           - Get all customers
   GET    /api/customers/:id       - Get customer by ID

@@ -1,11 +1,46 @@
-import React, { useState, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState, lazy, Suspense, createContext, useContext } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import CustomerForm from './pages/CustomerForm';
 import './App.css';
 
 // Lazy load KYC component for performance optimization
 const KYCPage = lazy(() => import('./pages/KYCPage'));
+
+// Lazy load auth-related pages
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const MFAPage = lazy(() => import('./pages/MFAPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+
+// AuthContext for authentication state management
+export const AuthContext = createContext({
+  isAuthenticated: false,
+  user: null,
+  login: () => {},
+  logout: () => {},
+});
+
+// AuthProvider component
+function AuthProvider({ children }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+
+  const login = (userData) => {
+    setIsAuthenticated(true);
+    setUser(userData);
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
 
 // Loading component for lazy-loaded routes
 function LoadingSpinner() {
@@ -42,24 +77,70 @@ function LoadingSpinner() {
   );
 }
 
+// ProtectedRoute guard component
+function ProtectedRoute({ children }) {
+  const { isAuthenticated } = useContext(AuthContext);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
+
 function App() {
   return (
-    <Router>
-      <div className="app-container">
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/form" element={<CustomerForm />} />
-          <Route 
-            path="/kyc" 
-            element={
-              <Suspense fallback={<LoadingSpinner />}>
-                <KYCPage />
-              </Suspense>
-            } 
-          />
-        </Routes>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="app-container">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route
+              path="/login"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LoginPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/mfa"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <MFAPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <ForgotPasswordPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/form"
+              element={
+                <ProtectedRoute>
+                  <CustomerForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/kyc"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <KYCPage />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 
