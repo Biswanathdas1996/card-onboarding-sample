@@ -2,10 +2,12 @@ import React, { useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import CustomerForm from './pages/CustomerForm';
+import ErrorBoundary from './components/ErrorBoundary'; // Assuming ErrorBoundary is in components folder
 import './App.css';
 
 // Lazy load KYC component for performance optimization
 const KYCPage = lazy(() => import('./pages/KYCPage'));
+const TaxFilingProcessFlowPage = lazy(() => import('./pages/TaxFilingProcessFlowPage')); // Lazy load TaxFilingProcessFlowPage
 
 // Loading component for lazy-loaded routes
 function LoadingSpinner() {
@@ -48,14 +50,25 @@ function App() {
       <div className="app-container">
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          {/* New route for TaxFilingProcessFlowPage, wrapped with ErrorBoundary */}
+          <Route
+            path="/tax-filing-process"
+            element={
+              <ErrorBoundary>
+                <Suspense fallback={<LoadingSpinner />}>
+                  <TaxFilingProcessFlowPage />
+                </Suspense>
+              </ErrorBoundary>
+            }
+          />
           <Route path="/form" element={<CustomerForm />} />
-          <Route 
-            path="/kyc" 
+          <Route
+            path="/kyc"
             element={
               <Suspense fallback={<LoadingSpinner />}>
                 <KYCPage />
               </Suspense>
-            } 
+            }
           />
         </Routes>
       </div>

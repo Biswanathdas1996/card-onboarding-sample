@@ -1,0 +1,184 @@
+.tax-flow-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif; /* Consistent with general app styling */
+}
+
+.tax-flow-page__title {
+  font-size: 2.5rem;
+  color: #333; /* Darker color for prominence */
+  margin-bottom: 2rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+.tax-flow-page__intro-text {
+  font-size: 1.1rem;
+  color: #555;
+  text-align: center;
+  margin-bottom: 3rem;
+  line-height: 1.6;
+  max-width: 800px;
+}
+
+.tax-flow-page__flowchart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem; /* Space between steps */
+  margin-bottom: 3rem;
+  width: 100%;
+}
+
+.tax-flow-page__flowchart-step {
+  background-color: #007bff; /* Blue rounded rectangle */
+  color: #ffffff; /* White text */
+  border-radius: 15px; /* Rounded corners */
+  padding: 1.5rem 2rem;
+  text-align: center;
+  width: 90%; /* Occupy significant portion */
+  max-width: 400px; /* Max width for desktop */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  transition: transform 0.2s ease-in-out;
+}
+
+.tax-flow-page__flowchart-step:hover {
+  transform: translateY(-5px); /* Slight lift on hover */
+}
+
+.tax-flow-page__flowchart-step-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.tax-flow-page__flowchart-step-description {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.tax-flow-page__arrow {
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 20px solid #007bff; /* Blue arrow */
+  margin: 0.5rem 0;
+}
+
+.tax-flow-page__continue-button {
+  background-color: #28a745; /* Green for primary action */
+  color: white;
+  padding: 1rem 2.5rem;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  min-height: 44px; /* Minimum tappable area */
+  min-width: 150px;
+  text-decoration: none; /* Ensure no underline if it's a link */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tax-flow-page__continue-button:hover {
+  background-color: #218838; /* Darker green on hover */
+  transform: translateY(-2px);
+}
+
+.tax-flow-page__continue-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tax-flow-page__title {
+    font-size: 2rem;
+  }
+
+  .tax-flow-page__intro-text {
+    font-size: 1rem;
+    padding: 0 1rem;
+  }
+
+  .tax-flow-page__flowchart-step {
+    width: 95%; /* Slightly wider on smaller screens */
+    padding: 1rem 1.5rem;
+  }
+
+  .tax-flow-page__flowchart-step-title {
+    font-size: 1.2rem;
+  }
+
+  .tax-flow-page__flowchart-step-description {
+    font-size: 0.9rem;
+  }
+
+  .tax-flow-page__arrow {
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 15px solid #007bff;
+  }
+
+  .tax-flow-page__continue-button {
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .tax-flow-page__title {
+    font-size: 1.8rem;
+  }
+
+  .tax-flow-page__intro-text {
+    font-size: 0.95rem;
+  }
+
+  .tax-flow-page__flowchart-step {
+    width: 100%; /* Full width on very small screens */
+    padding: 0.8rem 1rem;
+  }
+
+  .tax-flow-page__flowchart-step-title {
+    font-size: 1.1rem;
+  }
+
+  .tax-flow-page__flowchart-step-description {
+    font-size: 0.85rem;
+  }
+
+  .tax-flow-page__arrow {
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 12px solid #007bff;
+  }
+
+  .tax-flow-page__continue-button {
+    padding: 0.7rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* Loading spinner for button */
+.tax-flow-page__continue-button .spinner {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s ease-in-out infinite;
+  margin-left: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
