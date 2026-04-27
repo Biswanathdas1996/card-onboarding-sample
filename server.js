@@ -10,6 +10,7 @@ require('dotenv').config();
 
 const CustomerModel = require('./db/models/CustomerModel');
 const KYCModel = require('./db/models/KYCModel');
+const UserModel = require('./db/models/UserModel');
 const APIService = require('./api/APIService_DB');
 
 const app = express();
@@ -315,6 +316,114 @@ app.delete('/api/kyc/:kycId', async (req, res) => {
 });
 
 // ============================================
+// User Management Endpoints
+// ============================================
+
+/**
+ * POST /api/users
+ * Create a new user
+ */
+app.post('/api/users', async (req, res) => {
+  try {
+    const result = await UserModel.create(req.body);
+
+    res.status(201).json({
+      success: true,
+      data: result.data,
+      message: 'User created successfully'
+    });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error creating user',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/users
+ * Get all users
+ */
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await UserModel.getAll();
+
+    res.json({
+      success: true,
+      data: users,
+      count: users.length
+    });
+  } catch (error) {
+    console.error('Error retrieving users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving users',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/users/:userId
+ * Get user by ID
+ */
+app.get('/api/users/:userId', async (req, res) => {
+  try {
+    const user = await UserModel.getById(req.params.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    console.error('Error retrieving user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving user',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * DELETE /api/users/:userId
+ * Delete user
+ */
+app.delete('/api/users/:userId', async (req, res) => {
+  try {
+    const result = await UserModel.delete(req.params.userId);
+
+    if (!result.success) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'User deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting user',
+      error: error.message
+    });
+  }
+});
+
+// ============================================
 // Admin/Monitoring Endpoints
 // ============================================
 
@@ -398,6 +507,11 @@ Environment:  ${process.env.NODE_ENV || 'development'}
   GET    /api/kyc/submission/:id - Get KYC by ID
   PUT    /api/kyc/:id/verify     - Update verification status
   DELETE /api/kyc/:id            - Delete KYC record
+
+  POST   /api/users              - Create new user
+  GET    /api/users              - Get all users
+  GET    /api/users/:id          - Get user by ID
+  DELETE /api/users/:id          - Delete user
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   `);
 });
