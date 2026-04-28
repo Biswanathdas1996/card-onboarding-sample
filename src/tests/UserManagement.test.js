@@ -150,7 +150,7 @@ describe('UserManagement API Integration', () => {
         })
       );
 
-      const response = await fetch('http://localhost:5000/api/users', {
+      const response = await fetch('http://localhost:9000/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData)
@@ -179,7 +179,7 @@ describe('UserManagement API Integration', () => {
         })
       );
 
-      const response = await fetch('http://localhost:5000/api/users');
+      const response = await fetch('http://localhost:9000/api/users');
       const result = await response.json();
 
       expect(result.success).toBe(true);
@@ -196,7 +196,7 @@ describe('UserManagement Edge Cases', () => {
     );
 
     try {
-      await fetch('http://localhost:5000/api/users');
+      await fetch('http://localhost:9000/api/users');
     } catch (error) {
       expect(error.message).toBe('Network error');
     }
@@ -213,7 +213,7 @@ describe('UserManagement Edge Cases', () => {
       })
     );
 
-    const response = await fetch('http://localhost:5000/api/users');
+    const response = await fetch('http://localhost:9000/api/users');
     const result = await response.json();
 
     expect(result.success).toBe(true);

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import FormValidator from '../services/FormValidator';
 import './UserManagement.css';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:9000';
 
 function UserManagement() {
   const navigate = useNavigate();
