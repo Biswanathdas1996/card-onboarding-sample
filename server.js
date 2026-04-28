@@ -10,6 +10,7 @@ require('dotenv').config();
 
 const CustomerModel = require('./db/models/CustomerModel');
 const KYCModel = require('./db/models/KYCModel');
+const BasicDetailsModel = require('./db/models/BasicDetailsModel');
 const APIService = require('./api/APIService_DB');
 
 const app = express();
@@ -315,6 +316,93 @@ app.delete('/api/kyc/:kycId', async (req, res) => {
 });
 
 // ============================================
+// Basic Details Endpoints
+// ============================================
+
+/**
+ * POST /api/basic-details
+ * Add a new user with basic details
+ */
+app.post('/api/basic-details', async (req, res) => {
+  try {
+    const result = await BasicDetailsModel.create(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: result.error,
+        code: result.code
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      data: result.data,
+      message: 'User added successfully'
+    });
+  } catch (error) {
+    console.error('Error adding user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error adding user',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/basic-details
+ * Get all users with basic details
+ */
+app.get('/api/basic-details', async (req, res) => {
+  try {
+    const users = await BasicDetailsModel.getAll();
+
+    res.json({
+      success: true,
+      data: users,
+      count: users.length
+    });
+  } catch (error) {
+    console.error('Error retrieving users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving users',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/basic-details/:id
+ * Get a specific user by ID
+ */
+app.get('/api/basic-details/:id', async (req, res) => {
+  try {
+    const user = await BasicDetailsModel.getById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    console.error('Error retrieving user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving user',
+      error: error.message
+    });
+  }
+});
+
+// ============================================
 // Admin/Monitoring Endpoints
 // ============================================
 
@@ -398,6 +486,10 @@ Environment:  ${process.env.NODE_ENV || 'development'}
   GET    /api/kyc/submission/:id - Get KYC by ID
   PUT    /api/kyc/:id/verify     - Update verification status
   DELETE /api/kyc/:id            - Delete KYC record
+
+  POST   /api/basic-details      - Add new user
+  GET    /api/basic-details      - Get all users
+  GET    /api/basic-details/:id  - Get user by ID
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   `);
 });
