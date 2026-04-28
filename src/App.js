@@ -4,8 +4,9 @@ import LandingPage from './pages/LandingPage';
 import CustomerForm from './pages/CustomerForm';
 import './App.css';
 
-// Lazy load KYC component for performance optimization
+// Lazy load KYC and UserManagement components for performance optimization
 const KYCPage = lazy(() => import('./pages/KYCPage'));
+const UserManagement = lazy(() => import('./pages/UserManagement'));
 
 // Loading component for lazy-loaded routes
 function LoadingSpinner() {
@@ -49,13 +50,21 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/form" element={<CustomerForm />} />
-          <Route 
-            path="/kyc" 
+          <Route
+            path="/kyc"
             element={
               <Suspense fallback={<LoadingSpinner />}>
                 <KYCPage />
               </Suspense>
-            } 
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <UserManagement />
+              </Suspense>
+            }
           />
         </Routes>
       </div>

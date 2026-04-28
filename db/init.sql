@@ -151,4 +151,32 @@ GRANT SELECT, INSERT ON audit_logs TO neondb_owner;
 -- Allow seq access for UUID generation
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO neondb_owner;
 
+-- ============================================
+-- User Management Table
+-- Stores user management data (name, DOB, address)
+-- ============================================
+CREATE TABLE user_management (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  date_of_birth DATE NOT NULL,
+  address TEXT NOT NULL,
+
+  -- Audit fields
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for user management
+CREATE INDEX idx_user_management_name ON user_management(name);
+CREATE INDEX idx_user_management_created_at ON user_management(created_at);
+
+-- Create trigger to auto-update updated_at
+CREATE TRIGGER update_user_management_updated_at
+  BEFORE UPDATE ON user_management
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+-- Grant permissions for user management table
+GRANT SELECT, INSERT, UPDATE, DELETE ON user_management TO neondb_owner;
+
 COMMIT;

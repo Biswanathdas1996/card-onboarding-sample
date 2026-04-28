@@ -167,6 +167,45 @@ const FormValidator = {
       return null;
     }
 
+    // User Management Fields
+    if (fieldName === 'name') {
+      if (!trimmedValue) return 'Name is required';
+      if (trimmedValue.length < 2) {
+        return 'Name must be at least 2 characters';
+      }
+      if (!/^[a-zA-Z\s'-]+$/.test(trimmedValue)) {
+        return 'Name can only contain letters, spaces, hyphens, and apostrophes';
+      }
+      return null;
+    }
+
+    if (fieldName === 'userDob') {
+      if (!trimmedValue) return 'Date of birth is required';
+      const dob = new Date(trimmedValue);
+      const today = new Date();
+      if (isNaN(dob.getTime())) {
+        return 'Please enter a valid date';
+      }
+      if (dob >= today) {
+        return 'Date of birth must be in the past';
+      }
+      const age = today.getFullYear() - dob.getFullYear();
+      const monthDiff = today.getMonth() - dob.getMonth();
+      const adjustedAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate()) ? age - 1 : age;
+      if (adjustedAge < 18) {
+        return 'You must be at least 18 years old';
+      }
+      return null;
+    }
+
+    if (fieldName === 'userAddress') {
+      if (!trimmedValue) return 'Address is required';
+      if (trimmedValue.length < 10) {
+        return 'Address must be at least 10 characters';
+      }
+      return null;
+    }
+
     return null;
   },
 

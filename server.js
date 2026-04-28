@@ -315,6 +315,116 @@ app.delete('/api/kyc/:kycId', async (req, res) => {
 });
 
 // ============================================
+// User Management Endpoints
+// ============================================
+
+/**
+ * POST /api/users
+ * Add new user to user management
+ */
+app.post('/api/users', async (req, res) => {
+  try {
+    const { name, dateOfBirth, address } = req.body;
+
+    // Validate required fields
+    if (!name || !dateOfBirth || !address) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required: name, dateOfBirth, address'
+      });
+    }
+
+    const pool = require('./db/config');
+    const query = `
+      INSERT INTO user_management (name, date_of_birth, address)
+      VALUES ($1, $2, $3)
+      RETURNING id, name, date_of_birth, address, created_at
+    `;
+
+    const result = await pool.query(query, [name, dateOfBirth, address]);
+
+    res.status(201).json({
+      success: true,
+      message: 'User added successfully',
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Error adding user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error adding user',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/users
+ * Get all users from user management
+ */
+app.get('/api/users', async (req, res) => {
+  try {
+    const pool = require('./db/config');
+    const query = `
+      SELECT id, name, date_of_birth, address, created_at, updated_at
+      FROM user_management
+      ORDER BY created_at DESC
+    `;
+
+    const result = await pool.query(query);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      count: result.rows.length
+    });
+  } catch (error) {
+    console.error('Error retrieving users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving users',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/users/:userId
+ * Get specific user by ID
+ */
+app.get('/api/users/:userId', async (req, res) => {
+  try {
+    const pool = require('./db/config');
+    const query = `
+      SELECT id, name, date_of_birth, address, created_at, updated_at
+      FROM user_management
+      WHERE id = $1
+    `;
+
+    const result = await pool.query(query, [req.params.userId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Error retrieving user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving user',
+      error: error.message
+    });
+  }
+});
+
+// ============================================
 // Admin/Monitoring Endpoints
 // ============================================
 
@@ -398,6 +508,10 @@ Environment:  ${process.env.NODE_ENV || 'development'}
   GET    /api/kyc/submission/:id - Get KYC by ID
   PUT    /api/kyc/:id/verify     - Update verification status
   DELETE /api/kyc/:id            - Delete KYC record
+
+  POST   /api/users              - Add new user
+  GET    /api/users              - Get all users
+  GET    /api/users/:id          - Get user by ID
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   `);
 });
