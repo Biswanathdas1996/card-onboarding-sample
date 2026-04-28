@@ -34,6 +34,55 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
+.kyc-nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.kyc-nav-bar .back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.kyc-nav-bar .back-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.kyc-nav-bar .users-link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(45, 181, 218, 0.1);
+  border: 1px solid rgba(45, 181, 218, 0.3);
+  color: #2DB5DA;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.kyc-nav-bar .users-link-button:hover {
+  background: rgba(45, 181, 218, 0.2);
+  color: #2DB5DA;
+}
+
 .kyc-header {
   margin-bottom: 32px;
   text-align: center;
