@@ -167,13 +167,50 @@ const FormValidator = {
       return null;
     }
 
+    // User Management Form Fields
+    if (fieldName === 'name') {
+      if (!trimmedValue) return 'Name is required';
+      if (trimmedValue.length < 2) {
+        return 'Name must be at least 2 characters';
+      }
+      if (!/^[a-zA-Z\s'-]+$/.test(trimmedValue)) {
+        return 'Name can only contain letters, spaces, hyphens, and apostrophes';
+      }
+      return null;
+    }
+
+    if (fieldName === 'userDob') {
+      if (!trimmedValue) return 'Date of birth is required';
+      const dob = new Date(trimmedValue);
+      const today = new Date();
+      const age = today.getFullYear() - dob.getFullYear();
+      if (isNaN(dob.getTime())) {
+        return 'Please enter a valid date';
+      }
+      if (dob >= today) {
+        return 'Date of birth must be in the past';
+      }
+      if (age < 18) {
+        return 'You must be at least 18 years old';
+      }
+      return null;
+    }
+
+    if (fieldName === 'userAddress') {
+      if (!trimmedValue) return 'Address is required';
+      if (trimmedValue.length < 10) {
+        return 'Please enter a complete address (minimum 10 characters)';
+      }
+      return null;
+    }
+
     return null;
   },
 
   /**
    * Validate entire form
    * @param {object} formData - The form data object to validate
-   * @param {string} formType - Type of form ('customer' or 'kyc')
+   * @param {string} formType - Type of form ('customer', 'kyc', or 'user')
    * @returns {boolean} - True if all fields are valid
    */
   validateForm: (formData, formType = 'customer') => {
@@ -204,6 +241,13 @@ const FormValidator = {
         const error = FormValidator.validateField(field, formData[field]);
         if (error) return false;
       }
+    } else if (formType === 'user') {
+      const requiredFields = ['name', 'userDob', 'userAddress'];
+
+      for (const field of requiredFields) {
+        const error = FormValidator.validateField(field, formData[field]);
+        if (error) return false;
+      }
     }
 
     return true;
@@ -212,7 +256,7 @@ const FormValidator = {
   /**
    * Get all validation errors for a form
    * @param {object} formData - The form data object to validate
-   * @param {string} formType - Type of form ('customer' or 'kyc')
+   * @param {string} formType - Type of form ('customer', 'kyc', or 'user')
    * @returns {object} - Object with field names as keys and error messages as values
    */
   validateAll: (formData, formType = 'customer') => {
@@ -236,6 +280,8 @@ const FormValidator = {
       ];
     } else if (formType === 'kyc') {
       fields = ['govID', 'kycAddress', 'kycDob', 'pan', 'aadhaarNumber'];
+    } else if (formType === 'user') {
+      fields = ['name', 'userDob', 'userAddress'];
     }
 
     for (const field of fields) {

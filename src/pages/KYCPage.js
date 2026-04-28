@@ -126,6 +126,55 @@ function KYCPage() {
   return (
     <div className="kyc-page">
       <div className="kyc-container">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              background: 'transparent',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              color: 'rgba(255, 255, 255, 0.8)',
+              padding: '8px 16px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              transition: 'all 0.2s'
+            }}
+          >
+            ← Home
+          </button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button
+              onClick={() => navigate('/form')}
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: 'rgba(255, 255, 255, 0.8)',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                transition: 'all 0.2s'
+              }}
+            >
+              Apply
+            </button>
+            <button
+              onClick={() => navigate('/users')}
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: 'rgba(255, 255, 255, 0.8)',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                transition: 'all 0.2s'
+              }}
+            >
+              Users
+            </button>
+          </div>
+        </div>
         <div className="kyc-header">
           <h1>Identity Verification (KYC)</h1>
           <p>Please provide your government-issued ID details to complete the onboarding process.</p>

@@ -96,12 +96,31 @@ function CustomerForm() {
   return (
     <div className="form-container">
       <div className="form-wrapper">
-        <button className="back-button" onClick={() => navigate('/')}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-          Back
-        </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <button className="back-button" onClick={() => navigate('/')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back
+          </button>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <button
+              onClick={() => navigate('/users')}
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: 'rgba(255, 255, 255, 0.8)',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                transition: 'all 0.2s'
+              }}
+            >
+              Users
+            </button>
+          </div>
+        </div>
 
         <div className="form-header">
           <h2>Apply Now</h2>
