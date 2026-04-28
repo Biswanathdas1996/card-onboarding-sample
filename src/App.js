@@ -2,6 +2,7 @@ import React, { useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import CustomerForm from './pages/CustomerForm';
+import UserManagement from './pages/UserManagement';
 import './App.css';
 
 // Lazy load KYC component for performance optimization
@@ -49,13 +50,14 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/form" element={<CustomerForm />} />
-          <Route 
-            path="/kyc" 
+          <Route path="/users" element={<UserManagement />} />
+          <Route
+            path="/kyc"
             element={
               <Suspense fallback={<LoadingSpinner />}>
                 <KYCPage />
               </Suspense>
-            } 
+            }
           />
         </Routes>
       </div>
