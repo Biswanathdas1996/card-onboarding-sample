@@ -10,6 +10,7 @@ require('dotenv').config();
 
 const CustomerModel = require('./db/models/CustomerModel');
 const KYCModel = require('./db/models/KYCModel');
+const BasicDetailsModel = require('./db/models/BasicDetailsModel');
 const APIService = require('./api/APIService_DB');
 
 const app = express();
@@ -315,6 +316,131 @@ app.delete('/api/kyc/:kycId', async (req, res) => {
 });
 
 // ============================================
+// Basic Details Endpoints
+// ============================================
+
+/**
+ * POST /api/basic-details
+ * Submit new basic details
+ */
+app.post('/api/basic-details', async (req, res) => {
+  try {
+    const result = await BasicDetailsModel.create(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to create basic details',
+        error: result.error
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      data: result.data,
+      message: 'Basic details submitted successfully'
+    });
+  } catch (error) {
+    console.error('Error creating basic details:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error creating basic details',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/basic-details
+ * Get all basic details (paginated)
+ */
+app.get('/api/basic-details', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 100;
+    const offset = parseInt(req.query.offset) || 0;
+
+    const basicDetails = await BasicDetailsModel.getAll(limit, offset);
+    const total = await BasicDetailsModel.count();
+
+    res.json({
+      success: true,
+      data: basicDetails,
+      pagination: {
+        limit,
+        offset,
+        total,
+        hasMore: offset + limit < total
+      }
+    });
+  } catch (error) {
+    console.error('Error retrieving basic details:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving basic details',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/basic-details/:id
+ * Retrieve basic details by ID
+ */
+app.get('/api/basic-details/:id', async (req, res) => {
+  try {
+    const basicDetail = await BasicDetailsModel.getById(req.params.id);
+
+    if (!basicDetail) {
+      return res.status(404).json({
+        success: false,
+        message: 'Basic details not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: basicDetail
+    });
+  } catch (error) {
+    console.error('Error retrieving basic details:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving basic details',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * DELETE /api/basic-details/:id
+ * Delete basic details record
+ */
+app.delete('/api/basic-details/:id', async (req, res) => {
+  try {
+    const result = await BasicDetailsModel.delete(req.params.id);
+
+    if (!result.success) {
+      return res.status(404).json({
+        success: false,
+        message: 'Basic details not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Basic details deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting basic details:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting basic details',
+      error: error.message
+    });
+  }
+});
+
+// ============================================
 // Admin/Monitoring Endpoints
 // ============================================
 
@@ -398,6 +524,11 @@ Environment:  ${process.env.NODE_ENV || 'development'}
   GET    /api/kyc/submission/:id - Get KYC by ID
   PUT    /api/kyc/:id/verify     - Update verification status
   DELETE /api/kyc/:id            - Delete KYC record
+
+  POST   /api/basic-details      - Submit basic details
+  GET    /api/basic-details      - Get all basic details
+  GET    /api/basic-details/:id  - Get basic details by ID
+  DELETE /api/basic-details/:id  - Delete basic details
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   `);
 });

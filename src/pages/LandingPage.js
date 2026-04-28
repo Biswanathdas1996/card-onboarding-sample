@@ -78,6 +78,7 @@ function LandingPage() {
             <a href="#features">Features</a>
             <a href="#benefits">Benefits</a>
             <a href="#how-it-works">How it Works</a>
+            <a onClick={() => navigate('/basic-details')} style={{ cursor: 'pointer' }}>Basic Details</a>
           </div>
           <button className="nav-cta" onClick={() => navigate('/form')}>Apply Now</button>
         </div>
