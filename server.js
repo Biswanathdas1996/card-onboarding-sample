@@ -10,6 +10,7 @@ require('dotenv').config();
 
 const CustomerModel = require('./db/models/CustomerModel');
 const KYCModel = require('./db/models/KYCModel');
+const UserManagementModel = require('./db/models/UserManagementModel');
 const APIService = require('./api/APIService_DB');
 
 const app = express();
@@ -309,6 +310,180 @@ app.delete('/api/kyc/:kycId', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error deleting KYC data',
+      error: error.message
+    });
+  }
+});
+
+// ============================================
+// User Management Endpoints
+// ============================================
+
+/**
+ * POST /api/users
+ * Create new user
+ */
+app.post('/api/users', async (req, res) => {
+  try {
+    const { name, dateOfBirth, address } = req.body;
+
+    // Validate required fields
+    if (!name || !dateOfBirth || !address) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, date of birth, and address are required'
+      });
+    }
+
+    const result = await UserManagementModel.create({ name, dateOfBirth, address });
+
+    if (!result.success) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to create user',
+        error: result.error
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'User created successfully',
+      data: result.user
+    });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error creating user',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/users
+ * Get all users (paginated)
+ */
+app.get('/api/users', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = parseInt(req.query.offset) || 0;
+
+    const users = await UserManagementModel.getAll(limit, offset);
+    const total = await UserManagementModel.count();
+
+    res.json({
+      success: true,
+      data: users,
+      pagination: {
+        limit,
+        offset,
+        total,
+        hasMore: offset + limit < total
+      }
+    });
+  } catch (error) {
+    console.error('Error retrieving users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving users',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/users/:userId
+ * Get user by ID
+ */
+app.get('/api/users/:userId', async (req, res) => {
+  try {
+    const user = await UserManagementModel.getById(req.params.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    console.error('Error retrieving user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving user',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * PUT /api/users/:userId
+ * Update user
+ */
+app.put('/api/users/:userId', async (req, res) => {
+  try {
+    const { name, dateOfBirth, address } = req.body;
+
+    if (!name || !dateOfBirth || !address) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, date of birth, and address are required'
+      });
+    }
+
+    const user = await UserManagementModel.update(req.params.userId, { name, dateOfBirth, address });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'User updated successfully',
+      data: user
+    });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating user',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * DELETE /api/users/:userId
+ * Delete user
+ */
+app.delete('/api/users/:userId', async (req, res) => {
+  try {
+    const deleted = await UserManagementModel.delete(req.params.userId);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'User deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting user',
       error: error.message
     });
   }
