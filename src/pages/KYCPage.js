@@ -126,6 +126,42 @@ function KYCPage() {
   return (
     <div className="kyc-page">
       <div className="kyc-container">
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '6px',
+              color: 'rgba(255, 255, 255, 0.9)',
+              cursor: 'pointer',
+              fontSize: '14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Home
+          </button>
+          <button
+            onClick={() => navigate('/users')}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: 'rgba(45, 181, 218, 0.1)',
+              border: '1px solid #2DB5DA',
+              borderRadius: '6px',
+              color: '#2DB5DA',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            Users
+          </button>
+        </div>
         <div className="kyc-header">
           <h1>Identity Verification (KYC)</h1>
           <p>Please provide your government-issued ID details to complete the onboarding process.</p>

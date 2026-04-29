@@ -167,6 +167,18 @@ const FormValidator = {
       return null;
     }
 
+    // User Management Fields
+    if (fieldName === 'name') {
+      if (!trimmedValue) return 'Name is required';
+      if (trimmedValue.length < 2) {
+        return 'Name must be at least 2 characters';
+      }
+      if (!/^[a-zA-Z\s'-]+$/.test(trimmedValue)) {
+        return 'Name can only contain letters, spaces, hyphens, and apostrophes';
+      }
+      return null;
+    }
+
     return null;
   },
 
