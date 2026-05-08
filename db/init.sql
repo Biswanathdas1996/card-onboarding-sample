@@ -4,6 +4,7 @@
 -- Drop existing tables if they exist (for fresh setup)
 DROP TABLE IF EXISTS kyc_submissions CASCADE;
 DROP TABLE IF EXISTS customer_forms CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 
 -- ============================================
 -- Customer Forms Table
@@ -31,6 +32,25 @@ CREATE TABLE customer_forms (
 CREATE INDEX idx_customer_email ON customer_forms(email);
 CREATE INDEX idx_customer_status ON customer_forms(status);
 CREATE INDEX idx_customer_created_at ON customer_forms(created_at);
+
+-- ============================================
+-- Users Table
+-- Stores user management records
+-- ============================================
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  date_of_birth DATE NOT NULL,
+  address TEXT NOT NULL,
+
+  -- Audit fields
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for users
+CREATE INDEX idx_users_name ON users(name);
+CREATE INDEX idx_users_created_at ON users(created_at);
 
 -- ============================================
 -- KYC Submissions Table
@@ -139,6 +159,11 @@ CREATE TRIGGER update_kyc_submissions_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_users_updated_at
+  BEFORE UPDATE ON users
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
 -- ============================================
 -- Grant appropriate permissions
 -- ============================================
@@ -147,6 +172,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON customer_forms TO neondb_owner;
 GRANT SELECT, INSERT, UPDATE, DELETE ON kyc_submissions TO neondb_owner;
 GRANT SELECT, INSERT, UPDATE, DELETE ON pan_hashes TO neondb_owner;
 GRANT SELECT, INSERT ON audit_logs TO neondb_owner;
+GRANT SELECT, INSERT, UPDATE, DELETE ON users TO neondb_owner;
 
 -- Allow seq access for UUID generation
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO neondb_owner;

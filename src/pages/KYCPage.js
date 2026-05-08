@@ -126,6 +126,22 @@ function KYCPage() {
   return (
     <div className="kyc-page">
       <div className="kyc-container">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+          <button
+            style={{
+              padding: '8px 16px',
+              background: 'rgba(99, 102, 241, 0.1)',
+              border: '1px solid rgba(99, 102, 241, 0.3)',
+              borderRadius: '6px',
+              color: 'rgba(255, 255, 255, 0.9)',
+              cursor: 'pointer',
+              fontSize: '0.9rem'
+            }}
+            onClick={() => navigate('/users')}
+          >
+            Users
+          </button>
+        </div>
         <div className="kyc-header">
           <h1>Identity Verification (KYC)</h1>
           <p>Please provide your government-issued ID details to complete the onboarding process.</p>
